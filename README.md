@@ -15,7 +15,7 @@ L'algoritmo assegna i giocatori alle squadre cercando di:
 
 ## Installazione e avvio
 
-1. Clona la repository: ```git clone https://github.com/TUO-USERNAME/calcetto-maker.git```,
+1. Clona la repository: ```git clone https://github.com/lumon2004/calcetto-maker.git```,
 ```cd calcetto-maker```
 2. Copia il file di esempio e rinominalo: ```cp giocatoriCalcetto.example.json giocatoriCalcetto.json```
 3. Avvia il programma: ```python CalcettoMaker.py```
