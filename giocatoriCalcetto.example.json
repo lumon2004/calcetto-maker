@@ -1,0 +1,23 @@
+{
+    "giocatori": [
+        {"nome": "Mario", "livello": 8},
+        {"nome": "Luigi", "livello": 7},
+        {"nome": "Marco", "livello": 6},
+        {"nome": "Luca", "livello": 6},
+        {"nome": "Paolo", "livello": 5},
+        {"nome": "Giorgio", "livello": 7},
+        {"nome": "Andrea", "livello": 6},
+        {"nome": "Matteo", "livello": 5},
+        {"nome": "Davide", "livello": 7},
+        {"nome": "Simone", "livello": 6}
+    ],
+    "affinita": [
+        {
+            "_comment": "L'affinità va da 0 a 5, dove 5 = grande affinità, 0 = nessuna affinità"
+        },
+        {"a": "Mario", "b": "Luigi", "valore": 5},
+        {"a": "Mario", "b": "Marco", "valore": 3},
+        {"a": "Luigi", "b": "Paolo", "valore": 4},
+        {"a": "Marco", "b": "Giorgio", "valore": 2}
+    ]
+}

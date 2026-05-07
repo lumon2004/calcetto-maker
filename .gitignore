@@ -1,0 +1,7 @@
+# File dati personali - non pubblicare
+giocatoriCalcetto.json
+
+# File di sistema
+__pycache__/
+*.pyc
+.DS_Store
