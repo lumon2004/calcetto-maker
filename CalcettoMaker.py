@@ -1,41 +1,93 @@
 import json
 import os
 import time
+from itertools import combinations
 
 DATA_FILE = "giocatoriCalcetto.json"
-dati = {"giocatori": [], "affinita": []} # Variabili globali per giocatori e affinità
+dati = {"giocatori": [], "affinita": []}
+
+ALPHA = 0.7  # Peso del bilanciamento livello (0.7 = 70%)
 
 def wait(seconds):
     time.sleep(seconds)
 
+
+def chiedi_intero(prompt, min_val=None, max_val=None):
+    while True:
+        risposta = input(prompt).strip()
+        try:
+            valore = int(risposta)
+        except ValueError:
+            print("Valore non valido. Inserisci un numero intero.")
+            continue
+        if min_val is not None and valore < min_val:
+            print(f"Il valore deve essere almeno {min_val}.")
+            continue
+        if max_val is not None and valore > max_val:
+            print(f"Il valore deve essere al massimo {max_val}.")
+            continue
+        return valore
+
+
+def seleziona_giocatori(giocatori):
+    prompt = f"Inserisci i numeri di esattamente 10 giocatori (1-{len(giocatori)}), separati da spazi: "
+    risposta = input(prompt).strip()
+    if not risposta:
+        print("Nessun input fornito.")
+        return None
+
+    numeri = risposta.split()
+    if len(numeri) != 10:
+        print("Devi selezionare esattamente 10 giocatori.")
+        return None
+
+    selezione = []
+    for token in numeri:
+        if not token.isdigit():
+            print(f"Token non valido: '{token}'. Usa solo numeri interi.")
+            return None
+        indice = int(token)
+        if indice < 1 or indice > len(giocatori):
+            print(f"Numero fuori range: {indice}. Deve essere tra 1 e {len(giocatori)}.")
+            return None
+        if indice in selezione:
+            print(f"Numero duplicato: {indice}. Ogni giocatore può essere selezionato una sola volta.")
+            return None
+        selezione.append(indice)
+
+    return [giocatori[i - 1] for i in selezione]
+
+
 def main():
-    # Testo di avvio
     print("Benvenuto al Calcetto Maker!")
     print("Questo programma ti aiuterà a creare due squadre per giocare a calcetto.")
 
     giocatori = carica()
     print(f"Giocatori caricati: {len(giocatori)}")
 
-    while True:
-        print("\nScegli un'opzione:")
-        print("1. Mostra giocatori")
-        print("2. Aggiungi giocatore")
-        print("3. Formula squadre")
-        print("4. Esci")
+    try:
+        while True:
+            print("\nScegli un'opzione:")
+            print("1. Mostra giocatori")
+            print("2. Aggiungi giocatore")
+            print("3. Formula squadre")
+            print("4. Esci")
 
-        scelta = input("> ").strip()
+            scelta = input("> ").strip()
 
-        if scelta == "1":
-            mostra(giocatori)
-        elif scelta == "2":
-            aggiungi(giocatori)
-        elif scelta == "3":
-            formula_squadre(giocatori)
-        elif scelta == "4":
-            print("Arrivederci!")
-            break
-        else:
-            print("Opzione non valida. Riprova.")
+            if scelta == "1":
+                mostra(giocatori)
+            elif scelta == "2":
+                aggiungi(giocatori)
+            elif scelta == "3":
+                formula_squadre(giocatori)
+            elif scelta == "4":
+                print("Arrivederci!")
+                break
+            else:
+                print("Opzione non valida. Riprova.")
+    except KeyboardInterrupt:
+        print("\nInterruzione ricevuta. Arrivederci!")
 
 
 def formula_squadre(giocatori):
@@ -45,59 +97,107 @@ def formula_squadre(giocatori):
     elif len(giocatori) > 10:
         print("Ci sono più di 10 giocatori. Chi gioca questa volta?")
         mostra(giocatori)
-        giocatoriCorrenti = [giocatori[int(i)-1] for i in input("Inserisci i numeri dei giocatori (separati da spazi): ").strip().split()]
-    else: # giocatori esattamente 10
+        giocatoriCorrenti = seleziona_giocatori(giocatori)
+        if giocatoriCorrenti is None:
+            return
+    else:
         giocatoriCorrenti = giocatori
 
     esegui_algoritmo(giocatoriCorrenti)
+
+
+def affinita_interna(squadra, affinita_dict):
+    """Somma le affinità tra tutte le coppie interne di una squadra."""
+    totale = 0
+    nomi = [g['nome'] for g in squadra]
+    for i in range(len(nomi)):
+        for j in range(i + 1, len(nomi)):
+            totale += affinita_dict.get(nomi[i], {}).get(nomi[j], 0)
+    return totale
+
 
 def esegui_algoritmo(giocatori):
     if len(giocatori) != 10:
         print("Il numero di giocatori non è esatto (10).")
         return
 
-    # Costruisci dizionario affinità
+    for g in giocatori:
+        if not isinstance(g, dict) or 'nome' not in g or 'livello' not in g:
+            print("Dati giocatore non validi. Controlla il contenuto di giocatori.")
+            return
+        if not isinstance(g['nome'], str) or not g['nome'].strip():
+            print("Ogni giocatore deve avere un nome valido.")
+            return
+        if not isinstance(g['livello'], int) or g['livello'] < 1:
+            print("Ogni giocatore deve avere un livello intero valido.")
+            return
+
     affinita_dict = {g['nome']: {} for g in giocatori}
-    for aff in dati["affinita"]:
-        a, b, val = aff.get('a'), aff.get('b'), aff.get('valore')
+    for aff in dati.get("affinita", []):
+        if not isinstance(aff, dict):
+            continue
+        a = aff.get('a')
+        b = aff.get('b')
+        val = aff.get('valore', 0)
         if a in affinita_dict and b in affinita_dict:
-            affinita_dict[a][b] = val
-            affinita_dict[b][a] = val
+            try:
+                valore = int(val)
+            except (TypeError, ValueError):
+                valore = 0
+            affinita_dict[a][b] = valore
+            affinita_dict[b][a] = valore
 
-    # Ordina per livello decrescente
-    ordinati = sorted(giocatori, key=lambda x: x['livello'], reverse=True)
-    
-    squadra1, squadra2 = [], []
+    livello_max = sum(sorted([g['livello'] for g in giocatori], reverse=True)[:5])
+    delta_livello_max = livello_max if livello_max > 0 else 1
+    delta_affinita_max = 5 * 10
 
-    for g in ordinati:
-        nome = g['nome']
-        livello_s1 = sum(p['livello'] for p in squadra1)
-        livello_s2 = sum(p['livello'] for p in squadra2)
-        
-        # Bonus affinità: quanti compagni già assegnati conosco bene?
-        aff_s1 = sum(affinita_dict[nome].get(p['nome'], 0) for p in squadra1)
-        aff_s2 = sum(affinita_dict[nome].get(p['nome'], 0) for p in squadra2)
+    migliore_score = float('inf')
+    migliore_squadra1 = None
+    migliore_squadra2 = None
 
-        # Punteggio: voglio squadra con livello basso E affinità alta
-        # Peso affinità scalato per non dominare il bilanciamento
-        score_s1 = livello_s1 - aff_s1 * 0.3
-        score_s2 = livello_s2 - aff_s2 * 0.3
+    indici = list(range(10))
+    for combo in combinations(indici, 5):
+        squadra1 = [giocatori[i] for i in combo]
+        squadra2 = [giocatori[i] for i in indici if i not in combo]
 
-        if len(squadra1) >= 5:
-            squadra2.append(g)
-        elif len(squadra2) >= 5:
-            squadra1.append(g)
-        elif score_s1 <= score_s2:
-            squadra1.append(g)
-        else:
-            squadra2.append(g)
+        livello_s1 = sum(g['livello'] for g in squadra1)
+        livello_s2 = sum(g['livello'] for g in squadra2)
+        aff_s1 = affinita_interna(squadra1, affinita_dict)
+        aff_s2 = affinita_interna(squadra2, affinita_dict)
 
-    # Stampa
-    for nome_squadra, squadra in [("Squadra 1", squadra1), ("Squadra 2", squadra2)]:
+        delta_livello = abs(livello_s1 - livello_s2)
+        delta_affinita = abs(aff_s1 - aff_s2)
+
+        delta_livello_norm = delta_livello / delta_livello_max
+        delta_affinita_norm = delta_affinita / delta_affinita_max
+
+        score = ALPHA * delta_livello_norm + (1 - ALPHA) * delta_affinita_norm
+
+        if score < migliore_score:
+            migliore_score = score
+            migliore_squadra1 = squadra1
+            migliore_squadra2 = squadra2
+
+    if migliore_squadra1 is None or migliore_squadra2 is None:
+        print("Impossibile trovare una combinazione valida.")
+        return
+
+    for nome_squadra, squadra in [("Squadra 1", migliore_squadra1), ("Squadra 2", migliore_squadra2)]:
         print(f"\n{nome_squadra}:")
         for p in squadra:
-            print(f"  {p['nome']} (Livello: {p['livello']})")
-        print(f"  Livello totale: {sum(p['livello'] for p in squadra)}")
+            nome = p.get('nome', 'Sconosciuto')
+            livello = p.get('livello', 0)
+            print(f"  {nome} (Livello: {livello})")
+        livello_tot = sum(p.get('livello', 0) for p in squadra)
+        aff_tot = affinita_interna(squadra, affinita_dict)
+        print(f"  Livello totale: {livello_tot}")
+        print(f"  Affinità interna: {aff_tot}")
+
+    s1_liv = sum(p.get('livello', 0) for p in migliore_squadra1)
+    s2_liv = sum(p.get('livello', 0) for p in migliore_squadra2)
+    print(f"\nSquilibrio livello: {abs(s1_liv - s2_liv)}")
+    print(f"Score di squilibrio finale: {migliore_score:.4f} (più basso = più equilibrato)")
+
 
 def get_affinita(giocatore1, giocatore2):
     for coppia in dati["affinita"]:
@@ -105,7 +205,8 @@ def get_affinita(giocatore1, giocatore2):
             if (coppia["a"] == giocatore1 and coppia["b"] == giocatore2) or \
                (coppia["a"] == giocatore2 and coppia["b"] == giocatore1):
                 return coppia["valore"]
-    return None  # non trovato
+    return None
+
 
 def set_affinita(giocatore1, giocatore2, valore):
     for coppia in dati["affinita"]:
@@ -114,40 +215,84 @@ def set_affinita(giocatore1, giocatore2, valore):
                (coppia["a"] == giocatore2 and coppia["b"] == giocatore1):
                 coppia["valore"] = valore
                 return
-    # Se non esiste, aggiungila
     dati["affinita"].append({"a": giocatore1, "b": giocatore2, "valore": valore})
+
 
 def carica():
     global dati
     if not os.path.exists(DATA_FILE):
         return []
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
-        dati = json.load(f)
-        return dati["giocatori"]
+    try:
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            dati = json.load(f)
+    except json.JSONDecodeError:
+        print(f"Impossibile leggere '{DATA_FILE}': file JSON non valido.")
+        dati = {"giocatori": [], "affinita": []}
+        return []
+    except OSError as exc:
+        print(f"Errore di accesso a '{DATA_FILE}': {exc}")
+        return []
+
+    if not isinstance(dati, dict):
+        print(f"Dati non validi in '{DATA_FILE}'.")
+        dati = {"giocatori": [], "affinita": []}
+        return []
+
+    if not isinstance(dati.get("giocatori"), list):
+        print("La lista dei giocatori non è valida. Viene usata una lista vuota.")
+        dati["giocatori"] = []
+
+    if not isinstance(dati.get("affinita"), list):
+        dati["affinita"] = []
+
+    return dati["giocatori"]
+
 
 def salva(giocatori):
     global dati
     dati["giocatori"] = giocatori
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(dati, f, indent=4, ensure_ascii=False)
+    if not isinstance(dati.get("affinita"), list):
+        dati["affinita"] = []
+    try:
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(dati, f, indent=4, ensure_ascii=False)
+    except OSError as exc:
+        print(f"Impossibile salvare i dati in '{DATA_FILE}': {exc}")
+
 
 def mostra(giocatori):
     if not giocatori:
         print("Nessun giocatore trovato.")
         return
     for i, c in enumerate(giocatori, 1):
-        print(f"{i}. {c['nome']} (Livello: {c['livello']})")
+        nome = c.get('nome', 'Sconosciuto') if isinstance(c, dict) else 'Sconosciuto'
+        livello = c.get('livello', '?') if isinstance(c, dict) else '?'
+        print(f"{i}. {nome} (Livello: {livello})")
+
 
 def aggiungi(giocatori):
-    nome = input("Inserisci il nome del giocatore: ").strip()
-    livello = int(input("Inserisci il livello del giocatore (1-10): "))
-    giocatori.append({"nome": nome, "livello": livello})
-    # aggiungi affinità con giocatori esistenti
-    for g in giocatori[:-1]:  # escludi l'ultimo giocatore
-        aff = int(input(f"Inserisci l'affinità tra {nome} e {g['nome']} (0-5): "))
+    while True:
+        nome = input("Inserisci il nome del giocatore: ").strip()
+        if not nome:
+            print("Il nome non può essere vuoto.")
+            continue
+        if any(isinstance(g, dict) and g.get('nome') == nome for g in giocatori):
+            print("Esiste già un giocatore con questo nome. Scegli un nome diverso.")
+            continue
+        break
+
+    livello = chiedi_intero("Inserisci il livello del giocatore (1-10): ", 1, 10)
+    nuovo_giocatore = {"nome": nome, "livello": livello}
+    for g in giocatori:
+        if not isinstance(g, dict) or 'nome' not in g:
+            continue
+        aff = chiedi_intero(f"Inserisci l'affinità tra {nome} e {g['nome']} (0-5): ", 0, 5)
         set_affinita(nome, g["nome"], aff)
+
+    giocatori.append(nuovo_giocatore)
     salva(giocatori)
     print("Giocatore aggiunto con successo!")
+
 
 if __name__ == "__main__":
     main()
