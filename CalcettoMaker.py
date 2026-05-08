@@ -71,7 +71,9 @@ def main():
             print("1. Mostra giocatori")
             print("2. Aggiungi giocatore")
             print("3. Formula squadre")
-            print("4. Esci")
+            print("4. Modifica giocatore")
+            print("5. Elimina giocatore")
+            print("6. Esci")
 
             scelta = input("> ").strip()
 
@@ -82,6 +84,10 @@ def main():
             elif scelta == "3":
                 formula_squadre(giocatori)
             elif scelta == "4":
+                modifica_giocatore(giocatori)
+            elif scelta == "5":
+                elimina_giocatore(giocatori)
+            elif scelta == "6":
                 print("Arrivederci!")
                 break
             else:
@@ -292,6 +298,97 @@ def aggiungi(giocatori):
     giocatori.append(nuovo_giocatore)
     salva(giocatori)
     print("Giocatore aggiunto con successo!")
+
+
+def scegli_giocatore(giocatori, descrizione="giocatore"):
+    if not giocatori:
+        print("Nessun giocatore disponibile.")
+        return None
+    mostra(giocatori)
+    indice = chiedi_intero(f"Seleziona il numero del {descrizione} (1-{len(giocatori)}): ", 1, len(giocatori))
+    return indice - 1
+
+
+def chiedi_intero_opzionale(prompt, min_val=None, max_val=None, default=None):
+    while True:
+        risposta = input(prompt).strip()
+        if risposta == "":
+            return default
+        try:
+            valore = int(risposta)
+        except ValueError:
+            print("Valore non valido. Inserisci un numero intero o lascia vuoto per mantenere il valore corrente.")
+            continue
+        if min_val is not None and valore < min_val:
+            print(f"Il valore deve essere almeno {min_val}.")
+            continue
+        if max_val is not None and valore > max_val:
+            print(f"Il valore deve essere al massimo {max_val}.")
+            continue
+        return valore
+
+
+def modifica_nome_affinita(vecchio_nome, nuovo_nome):
+    for coppia in dati.get("affinita", []):
+        if not isinstance(coppia, dict):
+            continue
+        if coppia.get("a") == vecchio_nome:
+            coppia["a"] = nuovo_nome
+        if coppia.get("b") == vecchio_nome:
+            coppia["b"] = nuovo_nome
+
+
+def modifica_giocatore(giocatori):
+    if not giocatori:
+        print("Nessun giocatore da modificare.")
+        return
+
+    indice = scegli_giocatore(giocatori, "giocatore da modificare")
+    if indice is None:
+        return
+
+    giocatore = giocatori[indice]
+    nome_vecchio = giocatore.get('nome', '')
+    livello_vecchio = giocatore.get('livello', 0)
+
+    print(f"Modifica giocatore {nome_vecchio} (Livello: {livello_vecchio})")
+    nuovo_nome = input("Nuovo nome (lascia vuoto per mantenere): ").strip()
+    if nuovo_nome:
+        if any(isinstance(g, dict) and g.get('nome') == nuovo_nome for i, g in enumerate(giocatori) if i != indice):
+            print("Esiste già un giocatore con questo nome. Modifica annullata.")
+            return
+        giocatore['nome'] = nuovo_nome
+        modifica_nome_affinita(nome_vecchio, nuovo_nome)
+
+    nuovo_livello = chiedi_intero_opzionale("Nuovo livello (1-10, lascia vuoto per mantenere): ", 1, 10, default=livello_vecchio)
+    if nuovo_livello is None:
+        nuovo_livello = livello_vecchio
+    giocatore['livello'] = nuovo_livello
+
+    salva(giocatori)
+    print("Giocatore modificato con successo!")
+
+
+def elimina_giocatore(giocatori):
+    if not giocatori:
+        print("Nessun giocatore da eliminare.")
+        return
+
+    indice = scegli_giocatore(giocatori, "giocatore da eliminare")
+    if indice is None:
+        return
+
+    giocatore = giocatori[indice]
+    nome = giocatore.get('nome', '')
+    conferma = input(f"Vuoi davvero eliminare {nome}? (s/n): ").strip().lower()
+    if conferma not in ('s', 'si'):
+        print("Eliminazione annullata.")
+        return
+
+    del giocatori[indice]
+    dati["affinita"] = [c for c in dati.get("affinita", []) if not (isinstance(c, dict) and (c.get("a") == nome or c.get("b") == nome))]
+    salva(giocatori)
+    print("Giocatore eliminato con successo.")
 
 
 if __name__ == "__main__":
