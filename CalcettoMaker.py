@@ -12,9 +12,20 @@ def wait(seconds):
     time.sleep(seconds)
 
 
+def input_sicuro(prompt):
+    try:
+        return input(prompt)
+    except EOFError:
+        print("\nRitorno al menu principale.")
+        return None
+
+
 def chiedi_intero(prompt, min_val=None, max_val=None):
     while True:
-        risposta = input(prompt).strip()
+        risposta = input_sicuro(prompt)
+        if risposta is None:
+            return None
+        risposta = risposta.strip()
         try:
             valore = int(risposta)
         except ValueError:
@@ -31,7 +42,10 @@ def chiedi_intero(prompt, min_val=None, max_val=None):
 
 def seleziona_giocatori(giocatori):
     prompt = f"Inserisci i numeri di esattamente 10 giocatori (1-{len(giocatori)}), separati da spazi: "
-    risposta = input(prompt).strip()
+    risposta = input_sicuro(prompt)
+    if risposta is None:
+        return None
+    risposta = risposta.strip()
     if not risposta:
         print("Nessun input fornito.")
         return None
@@ -75,7 +89,10 @@ def main():
             print("5. Elimina giocatore")
             print("6. Esci")
 
-            scelta = input("> ").strip()
+            scelta = input_sicuro("> ")
+            if scelta is None:
+                continue
+            scelta = scelta.strip()
 
             if scelta == "1":
                 mostra(giocatori)
@@ -278,7 +295,10 @@ def mostra(giocatori):
 
 def aggiungi(giocatori):
     while True:
-        nome = input("Inserisci il nome del giocatore: ").strip()
+        nome = input_sicuro("Inserisci il nome del giocatore: ")
+        if nome is None:
+            return
+        nome = nome.strip()
         if not nome:
             print("Il nome non può essere vuoto.")
             continue
@@ -288,11 +308,15 @@ def aggiungi(giocatori):
         break
 
     livello = chiedi_intero("Inserisci il livello del giocatore (1-10): ", 1, 10)
+    if livello is None:
+        return
     nuovo_giocatore = {"nome": nome, "livello": livello}
     for g in giocatori:
         if not isinstance(g, dict) or 'nome' not in g:
             continue
         aff = chiedi_intero(f"Inserisci l'affinità tra {nome} e {g['nome']} (0-5): ", 0, 5)
+        if aff is None:
+            return
         set_affinita(nome, g["nome"], aff)
 
     giocatori.append(nuovo_giocatore)
@@ -306,12 +330,17 @@ def scegli_giocatore(giocatori, descrizione="giocatore"):
         return None
     mostra(giocatori)
     indice = chiedi_intero(f"Seleziona il numero del {descrizione} (1-{len(giocatori)}): ", 1, len(giocatori))
+    if indice is None:
+        return None
     return indice - 1
 
 
 def chiedi_intero_opzionale(prompt, min_val=None, max_val=None, default=None):
     while True:
-        risposta = input(prompt).strip()
+        risposta = input_sicuro(prompt)
+        if risposta is None:
+            return None
+        risposta = risposta.strip()
         if risposta == "":
             return default
         try:
@@ -352,7 +381,10 @@ def modifica_giocatore(giocatori):
     livello_vecchio = giocatore.get('livello', 0)
 
     print(f"Modifica giocatore {nome_vecchio} (Livello: {livello_vecchio})")
-    nuovo_nome = input("Nuovo nome (lascia vuoto per mantenere): ").strip()
+    nuovo_nome = input_sicuro("Nuovo nome (lascia vuoto per mantenere): ")
+    if nuovo_nome is None:
+        return
+    nuovo_nome = nuovo_nome.strip()
     if nuovo_nome:
         if any(isinstance(g, dict) and g.get('nome') == nuovo_nome for i, g in enumerate(giocatori) if i != indice):
             print("Esiste già un giocatore con questo nome. Modifica annullata.")
@@ -361,6 +393,8 @@ def modifica_giocatore(giocatori):
         modifica_nome_affinita(nome_vecchio, nuovo_nome)
 
     nuovo_livello = chiedi_intero_opzionale("Nuovo livello (1-10, lascia vuoto per mantenere): ", 1, 10, default=livello_vecchio)
+    if nuovo_livello is None:
+        return
     if nuovo_livello is None:
         nuovo_livello = livello_vecchio
     giocatore['livello'] = nuovo_livello
@@ -380,7 +414,10 @@ def elimina_giocatore(giocatori):
 
     giocatore = giocatori[indice]
     nome = giocatore.get('nome', '')
-    conferma = input(f"Vuoi davvero eliminare {nome}? (s/n): ").strip().lower()
+    conferma = input_sicuro(f"Vuoi davvero eliminare {nome}? (s/n): ")
+    if conferma is None:
+        return
+    conferma = conferma.strip().lower()
     if conferma not in ('s', 'si'):
         print("Eliminazione annullata.")
         return
