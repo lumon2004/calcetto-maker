@@ -1,6 +1,6 @@
 from itertools import combinations
 from config import ALPHA
-from data import dati
+import data
 
 def affinita_interna(squadra, affinita_dict):
     """Somma le affinità tra tutte le coppie interne di una squadra."""
@@ -28,7 +28,7 @@ def esegui_algoritmo(giocatori):
             return
 
     affinita_dict = {g['nome']: {} for g in giocatori}
-    for aff in dati.get("affinita", []):
+    for aff in data.dati.get("affinita", []):
         if not isinstance(aff, dict):
             continue
         a = aff.get('a')
@@ -42,6 +42,7 @@ def esegui_algoritmo(giocatori):
             affinita_dict[a][b] = valore
             affinita_dict[b][a] = valore
 
+    print("DEBUG affinita_dict:", affinita_dict)
     livello_max = sum(sorted([g['livello'] for g in giocatori], reverse=True)[:5])
     delta_livello_max = livello_max if livello_max > 0 else 1
     delta_affinita_max = 5 * 10
