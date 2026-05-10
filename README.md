@@ -20,6 +20,13 @@ L'algoritmo assegna i giocatori alle squadre cercando di:
 2. Copia il file di esempio e rinominalo: ```cp giocatoriCalcetto.example.json giocatoriCalcetto.json```
 3. Avvia il programma: ```python CalcettoMaker.py```
 
+## 🐳 Avvio con Docker
+
+```bash
+docker build -t calcetto-maker .
+docker run -it -v $(pwd)/giocatoriCalcetto.json:/app/giocatoriCalcetto.json calcetto-maker
+```
+
 ## Il file dei giocatori (JSON)
 
 Il programma legge i dati da `giocatoriCalcetto.json`. Puoi crearlo manualmente partendo dall'esempio (`giocatoriCalcetto.example.json`) oppure usare l'opzione **"Aggiungi giocatore"** direttamente dal menu del programma.
