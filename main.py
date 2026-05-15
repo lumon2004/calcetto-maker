@@ -1,62 +1,62 @@
-from data import carica
-from ui import input_sicuro, seleziona_giocatori
-from algoritmo import esegui_algoritmo
-from giocatori import mostra, aggiungi, modifica_giocatore, elimina_giocatore
+from data import load
+from ui import safe_input, select_players
+from algorithm import run_algorithm
+from players import show, add, edit_player, delete_player
 
 def main():
-    print("Benvenuto al Calcetto Maker!")
-    print("Questo programma ti aiuterà a creare due squadre per giocare a calcetto.")
+    print("Welcome to Pitch Picker!")
+    print("This program will help you create two balanced teams for a five-a-side match.")
 
-    giocatori = carica()
-    print(f"Giocatori caricati: {len(giocatori)}")
+    players = load()
+    print(f"Players loaded: {len(players)}")
 
     try:
         while True:
-            print("\nScegli un'opzione:")
-            print("1. Mostra giocatori")
-            print("2. Aggiungi giocatore")
-            print("3. Formula squadre")
-            print("4. Modifica giocatore")
-            print("5. Elimina giocatore")
-            print("6. Esci")
+            print("\nChoose an option:")
+            print("1. Show players")
+            print("2. Add player")
+            print("3. Build teams")
+            print("4. Edit player")
+            print("5. Delete player")
+            print("6. Exit")
 
-            scelta = input_sicuro("> ")
-            if scelta is None:
+            choice = safe_input("> ")
+            if choice is None:
                 continue
-            scelta = scelta.strip()
+            choice = choice.strip()
 
-            if scelta == "1":
-                mostra(giocatori)
-            elif scelta == "2":
-                aggiungi(giocatori)
-            elif scelta == "3":
-                formula_squadre(giocatori)
-            elif scelta == "4":
-                modifica_giocatore(giocatori)
-            elif scelta == "5":
-                elimina_giocatore(giocatori)
-            elif scelta == "6":
-                print("Arrivederci!")
+            if choice == "1":
+                show(players)
+            elif choice == "2":
+                add(players)
+            elif choice == "3":
+                build_teams(players)
+            elif choice == "4":
+                edit_player(players)
+            elif choice == "5":
+                delete_player(players)
+            elif choice == "6":
+                print("Goodbye!")
                 break
             else:
-                print("Opzione non valida. Riprova.")
+                print("Invalid option. Please try again.")
     except KeyboardInterrupt:
-        print("\nInterruzione ricevuta. Arrivederci!")
+        print("\nInterruption received. Goodbye!")
 
-def formula_squadre(giocatori):
-    if len(giocatori) < 10:
-        print("Non ci sono abbastanza giocatori per formare due squadre (minimo 10).")
+def build_teams(players):
+    if len(players) < 10:
+        print("Not enough players to form two teams (minimum 10).")
         return
-    elif len(giocatori) > 10:
-        print("Ci sono più di 10 giocatori. Chi gioca questa volta?")
-        mostra(giocatori)
-        giocatoriCorrenti = seleziona_giocatori(giocatori)
-        if giocatoriCorrenti is None:
+    elif len(players) > 10:
+        print("There are more than 10 players. Who is playing tonight?")
+        show(players)
+        current_players = select_players(players)
+        if current_players is None:
             return
     else:
-        giocatoriCorrenti = giocatori
+        current_players = players
 
-    esegui_algoritmo(giocatoriCorrenti)
+    run_algorithm(current_players)
 
 if __name__ == "__main__":
     main()

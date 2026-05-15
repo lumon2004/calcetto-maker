@@ -1,0 +1,23 @@
+{
+    "players": [
+        {"name": "Mario", "level": 8},
+        {"name": "Luigi", "level": 7},
+        {"name": "Marco", "level": 6},
+        {"name": "Luca", "level": 6},
+        {"name": "Paolo", "level": 5},
+        {"name": "Giorgio", "level": 7},
+        {"name": "Andrea", "level": 6},
+        {"name": "Matteo", "level": 5},
+        {"name": "Davide", "level": 7},
+        {"name": "Simone", "level": 6}
+    ],
+    "affinities": [
+        {
+            "_comment": "Affinity ranges from 0 to 5, where 5 = great affinity, 0 = no affinity"
+        },
+        {"a": "Mario", "b": "Luigi", "value": 5},
+        {"a": "Mario", "b": "Marco", "value": 3},
+        {"a": "Luigi", "b": "Paolo", "value": 4},
+        {"a": "Marco", "b": "Giorgio", "value": 2}
+    ]
+}

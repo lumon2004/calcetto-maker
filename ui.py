@@ -3,80 +3,80 @@ import time
 def wait(seconds):
     time.sleep(seconds)
 
-def input_sicuro(prompt):
+def safe_input(prompt):
     try:
         return input(prompt)
     except EOFError:
-        print("\nRitorno al menu principale.")
+        print("\nReturning to main menu.")
         return None
 
-def chiedi_intero(prompt, min_val=None, max_val=None):
+def ask_integer(prompt, min_val=None, max_val=None):
     while True:
-        risposta = input_sicuro(prompt)
-        if risposta is None:
+        answer = safe_input(prompt)
+        if answer is None:
             return None
-        risposta = risposta.strip()
+        answer = answer.strip()
         try:
-            valore = int(risposta)
+            value = int(answer)
         except ValueError:
-            print("Valore non valido. Inserisci un numero intero.")
+            print("Invalid value. Please enter an integer.")
             continue
-        if min_val is not None and valore < min_val:
-            print(f"Il valore deve essere almeno {min_val}.")
+        if min_val is not None and value < min_val:
+            print(f"Value must be at least {min_val}.")
             continue
-        if max_val is not None and valore > max_val:
-            print(f"Il valore deve essere al massimo {max_val}.")
+        if max_val is not None and value > max_val:
+            print(f"Value must be at most {max_val}.")
             continue
-        return valore
+        return value
 
-def chiedi_intero_opzionale(prompt, min_val=None, max_val=None, default=None):
+def ask_integer_optional(prompt, min_val=None, max_val=None, default=None):
     while True:
-        risposta = input_sicuro(prompt)
-        if risposta is None:
+        answer = safe_input(prompt)
+        if answer is None:
             return None
-        risposta = risposta.strip()
-        if risposta == "":
+        answer = answer.strip()
+        if answer == "":
             return default
         try:
-            valore = int(risposta)
+            value = int(answer)
         except ValueError:
-            print("Valore non valido. Inserisci un numero intero o lascia vuoto per mantenere il valore corrente.")
+            print("Invalid value. Please enter an integer or leave blank to keep the current value.")
             continue
-        if min_val is not None and valore < min_val:
-            print(f"Il valore deve essere almeno {min_val}.")
+        if min_val is not None and value < min_val:
+            print(f"Value must be at least {min_val}.")
             continue
-        if max_val is not None and valore > max_val:
-            print(f"Il valore deve essere al massimo {max_val}.")
+        if max_val is not None and value > max_val:
+            print(f"Value must be at most {max_val}.")
             continue
-        return valore
+        return value
 
-def seleziona_giocatori(giocatori):
-    prompt = f"Inserisci i numeri di esattamente 10 giocatori (1-{len(giocatori)}), separati da spazi: "
-    risposta = input_sicuro(prompt)
-    if risposta is None:
+def select_players(players):
+    prompt = f"Enter exactly 10 player numbers (1-{len(players)}), separated by spaces: "
+    answer = safe_input(prompt)
+    if answer is None:
         return None
-    risposta = risposta.strip()
-    if not risposta:
-        print("Nessun input fornito.")
-        return None
-
-    numeri = risposta.split()
-    if len(numeri) != 10:
-        print("Devi selezionare esattamente 10 giocatori.")
+    answer = answer.strip()
+    if not answer:
+        print("No input provided.")
         return None
 
-    selezione = []
-    for token in numeri:
+    numbers = answer.split()
+    if len(numbers) != 10:
+        print("You must select exactly 10 players.")
+        return None
+
+    selection = []
+    for token in numbers:
         if not token.isdigit():
-            print(f"Token non valido: '{token}'. Usa solo numeri interi.")
+            print(f"Invalid token: '{token}'. Use only integers.")
             return None
-        indice = int(token)
-        if indice < 1 or indice > len(giocatori):
-            print(f"Numero fuori range: {indice}. Deve essere tra 1 e {len(giocatori)}.")
+        index = int(token)
+        if index < 1 or index > len(players):
+            print(f"Number out of range: {index}. Must be between 1 and {len(players)}.")
             return None
-        if indice in selezione:
-            print(f"Numero duplicato: {indice}. Ogni giocatore può essere selezionato una sola volta.")
+        if index in selection:
+            print(f"Duplicate number: {index}. Each player can only be selected once.")
             return None
-        selezione.append(indice)
+        selection.append(index)
 
-    return [giocatori[i - 1] for i in selezione]
+    return [players[i - 1] for i in selection]

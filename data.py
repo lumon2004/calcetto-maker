@@ -1,70 +1,70 @@
 import json, os
 from config import DATA_FILE
 
-dati = {"giocatori": [], "affinita": []}
+dataset = {"players": [], "affinities": []}
 
-def carica():
-    global dati
+def load():
+    global dataset
     if not os.path.exists(DATA_FILE):
         return []
     try:
         with open(DATA_FILE, "r", encoding="utf-8") as f:
-            dati = json.load(f)
+            dataset = json.load(f)
     except json.JSONDecodeError:
-        print(f"Impossibile leggere '{DATA_FILE}': file JSON non valido.")
-        dati = {"giocatori": [], "affinita": []}
+        print(f"Unable to read '{DATA_FILE}': invalid JSON file.")
+        dataset = {"players": [], "affinities": []}
         return []
     except OSError as exc:
-        print(f"Errore di accesso a '{DATA_FILE}': {exc}")
+        print(f"Error accessing '{DATA_FILE}': {exc}")
         return []
 
-    if not isinstance(dati, dict):
-        print(f"Dati non validi in '{DATA_FILE}'.")
-        dati = {"giocatori": [], "affinita": []}
+    if not isinstance(dataset, dict):
+        print(f"Invalid data in '{DATA_FILE}'.")
+        dataset = {"players": [], "affinities": []}
         return []
 
-    if not isinstance(dati.get("giocatori"), list):
-        print("La lista dei giocatori non è valida. Viene usata una lista vuota.")
-        dati["giocatori"] = []
+    if not isinstance(dataset.get("players"), list):
+        print("The players list is invalid. Using an empty list.")
+        dataset["players"] = []
 
-    if not isinstance(dati.get("affinita"), list):
-        dati["affinita"] = []
+    if not isinstance(dataset.get("affinities"), list):
+        dataset["affinities"] = []
 
-    return dati["giocatori"]
+    return dataset["players"]
 
-def salva(giocatori):
-    global dati
-    dati["giocatori"] = giocatori
-    if not isinstance(dati.get("affinita"), list):
-        dati["affinita"] = []
+def save(players):
+    global dataset
+    dataset["players"] = players
+    if not isinstance(dataset.get("affinities"), list):
+        dataset["affinities"] = []
     try:
         with open(DATA_FILE, "w", encoding="utf-8") as f:
-            json.dump(dati, f, indent=4, ensure_ascii=False)
+            json.dump(dataset, f, indent=4, ensure_ascii=False)
     except OSError as exc:
-        print(f"Impossibile salvare i dati in '{DATA_FILE}': {exc}")
+        print(f"Unable to save data to '{DATA_FILE}': {exc}")
 
-def get_affinita(giocatore1, giocatore2):
-    for coppia in dati["affinita"]:
-        if "a" in coppia and "b" in coppia:
-            if (coppia["a"] == giocatore1 and coppia["b"] == giocatore2) or \
-               (coppia["a"] == giocatore2 and coppia["b"] == giocatore1):
-                return coppia["valore"]
+def get_affinity(player1, player2):
+    for pair in dataset["affinities"]:
+        if "a" in pair and "b" in pair:
+            if (pair["a"] == player1 and pair["b"] == player2) or \
+               (pair["a"] == player2 and pair["b"] == player1):
+                return pair["value"]
     return None
 
-def set_affinita(giocatore1, giocatore2, valore):
-    for coppia in dati["affinita"]:
-        if "a" in coppia and "b" in coppia:
-            if (coppia["a"] == giocatore1 and coppia["b"] == giocatore2) or \
-               (coppia["a"] == giocatore2 and coppia["b"] == giocatore1):
-                coppia["valore"] = valore
+def set_affinity(player1, player2, value):
+    for pair in dataset["affinities"]:
+        if "a" in pair and "b" in pair:
+            if (pair["a"] == player1 and pair["b"] == player2) or \
+               (pair["a"] == player2 and pair["b"] == player1):
+                pair["value"] = value
                 return
-    dati["affinita"].append({"a": giocatore1, "b": giocatore2, "valore": valore})
+    dataset["affinities"].append({"a": player1, "b": player2, "value": value})
 
-def modifica_nome_affinita(vecchio_nome, nuovo_nome):
-    for coppia in dati.get("affinita", []):
-        if not isinstance(coppia, dict):
+def update_affinity_name(old_name, new_name):
+    for pair in dataset.get("affinities", []):
+        if not isinstance(pair, dict):
             continue
-        if coppia.get("a") == vecchio_nome:
-            coppia["a"] = nuovo_nome
-        if coppia.get("b") == vecchio_nome:
-            coppia["b"] = nuovo_nome
+        if pair.get("a") == old_name:
+            pair["a"] = new_name
+        if pair.get("b") == old_name:
+            pair["b"] = new_name

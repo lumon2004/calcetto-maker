@@ -4,6 +4,6 @@ WORKDIR /app
 
 COPY . .
 
-RUN cp giocatoriCalcetto.example.json giocatoriCalcetto.json || true
+RUN cp players.example.json players.json || true
 
 CMD ["python", "main.py"]

@@ -1,62 +1,64 @@
-# ⚽ CalcettoMaker
+# ⚽ Pitch Picker
 
-Un tool da terminale per dividere automaticamente un gruppo di amici in **due squadre equilibrate** per una partita di calcetto, tenendo conto del livello di ogni giocatore e delle affinità tra di loro.
+A terminal tool to automatically split a group of friends into **two balanced teams** for a five-a-side football match, taking into account each player's skill level and the affinities between them.
 
-## Come funziona
+## How it works
 
-L'algoritmo assegna i giocatori alle squadre cercando di:
-1. **Bilanciare il livello totale** delle due squadre
-2. **Massimizzare le affinità** all'interno di ogni squadra (i compagni che si conoscono bene giocano meglio insieme)
+The algorithm assigns players to teams by trying to:
+1. **Balance the total skill level** of both teams
+2. **Maximise affinities** within each team (teammates who know each other well play better together)
 
-## Requisiti
+## Requirements
 
-- Python 3.8 o superiore
-- Nessuna libreria esterna richiesta (solo librerie standard)
+- Python 3.8 or higher
+- No external libraries required (standard library only)
 
-## Installazione e avvio
+## Installation and setup
 
-1. Clona la repository: ```git clone https://github.com/lumon2004/calcetto-maker.git```,
+1. Clone the repository: ```git clone https://github.com/lumon2004/calcetto-maker.git```,
 ```cd calcetto-maker```
-2. Copia il file di esempio e rinominalo: ```cp giocatoriCalcetto.example.json giocatoriCalcetto.json```
-3. Avvia il programma: ```python CalcettoMaker.py```
+2. Copy the example file and rename it: ```cp players.example.json players.json```
+3. Start the program: ```python main.py```
 
-## 🐳 Avvio con Docker
+## 🐳 Running with Docker
 
 ```bash
-docker build -t calcetto-maker .
-docker run -it -v $(pwd)/giocatoriCalcetto.json:/app/giocatoriCalcetto.json calcetto-maker
+docker build -t pitch-picker .
+docker run -it -v $(pwd)/players.json:/app/players.json pitch-picker
 ```
 
-## Il file dei giocatori (JSON)
+## The players file (JSON)
 
-Il programma legge i dati da `giocatoriCalcetto.json`. Puoi crearlo manualmente partendo dall'esempio (`giocatoriCalcetto.example.json`) oppure usare l'opzione **"Aggiungi giocatore"** direttamente dal menu del programma.
+The program reads data from `players.json`. You can create it manually from the example (`players.example.json`) or use the **"Add player"** option directly from the program menu.
 
-### Struttura del file
+### File structure
 
 ```json
 {
-    "giocatori": [
-        {"nome": "NomeGiocatore", "livello": 7}
+    "players": [
+        {"name": "PlayerName", "level": 7}
     ],
-    "affinita": [
-        {"a": "Giocatore1", "b": "Giocatore2", "valore": 4}
+    "affinities": [
+        {"a": "Player1", "b": "Player2", "value": 4}
     ]
 }
 ```
 
-- **`livello`**: da 1 (scarso) a 10 (fenomeno)
-- **`valore` affinità**: da 0 (si detestano) a 5 (migliori amici)
+- **`level`**: from 1 (beginner) to 10 (expert)
+- **`value` (affinity)**: from 0 (they hate each other) to 5 (best friends)
 
-## Utilizzo
+## Usage
 ```
-1. Mostra giocatori → lista tutti i giocatori salvati
-2. Aggiungi giocatore → aggiunge un nuovo giocatore e imposta le affinità
-3. Formula squadre → genera le due squadre bilanciate
-4. Esci
+1. Show players   → lists all saved players
+2. Add player     → adds a new player and sets affinities
+3. Build teams    → generates the two balanced teams
+4. Edit player    → updates an existing player's name or level
+5. Delete player  → removes a player
+6. Exit
 ```
 
-Se hai più di 10 giocatori registrati, il programma ti chiederà di selezionare chi gioca quella sera.
+If you have more than 10 registered players, the program will ask you to select who is playing that evening.
 
-## Licenza
+## License
 
-MIT License — fai quello che vuoi con il codice.
+MIT License — do whatever you want with the code.
